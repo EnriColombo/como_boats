@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'widgets/boat_detail_card.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,94 +16,79 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Boat Tours Lago di Como',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: BoatTourScreen(),
+      home: BoatMapScreen(),
     );
   }
 }
 
-class BoatTourScreen extends StatefulWidget {
-  const BoatTourScreen({super.key});
+class BoatMapScreen extends StatefulWidget {
+  const BoatMapScreen({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
-  _BoatTourScreenState createState() => _BoatTourScreenState();
+  _BoatMapScreenState createState() => _BoatMapScreenState();
 }
 
-class _BoatTourScreenState extends State<BoatTourScreen> {
+class _BoatMapScreenState extends State<BoatMapScreen> {
+  Map<String, dynamic>? _selectedBoat;
 
-  final List<Map<String, dynamic>> boats = [
+  final List<Map<String, dynamic>> _boats = [
     {
       "id": 1,
-      "nomebarca": "Perla del Lago",
-      "foto":
-          "https://taxiboatlierna.it/images/limo/venetian_limousine_principale.jpg",
-      "comandante": "Enrico",
-      "prezzoorario": 250.00,
+      "name": "Perla del Lago",
+      "captain": "Enrico",
+      "price": 250.00,
+      "images": [
+        "https://taxiboatlierna.it/images/limo/venetian_limousine_principale.jpg",
+        "https://taxiboatlierna.it/images/limo/venetian_limousine_principale.jpg",
+      ],
       "geo": {"lat": 45.98661616223449, "lng": 9.257043874433045}
     },
     {
       "id": 2,
-      "nomebarca": "Vento di Como",
-      "foto":
-          "https://taxiboatlierna.it/images/venice/classicvenice_principale.jpg",
-      "comandante": "Marco",
-      "prezzoorario": 200.00,
+      "name": "Vento di Como",
+      "captain": "Marco",
+      "price": 200.00,
+      "images": [
+        "https://taxiboatlierna.it/images/venice/classicvenice_principale.jpg",
+        "https://taxiboatlierna.it/images/venice/classicvenice_principale.jpg",
+      ],
       "geo": {"lat": 45.991224, "lng": 9.257900}
     },
     {
       "id": 3,
-      "nomebarca": "Onde Blu",
-      "foto": "https://taxiboatlierna.it/images/flotta/como-dreamer.jpg",
-      "comandante": "Alessandro",
-      "prezzoorario": 180.00,
+      "name": "Onde Blu",
+      "captain": "Alessandro",
+      "price": 180.00,
+      "images": [
+        "https://taxiboatlierna.it/images/flotta/como-dreamer.jpg",
+        "https://taxiboatlierna.it/images/flotta/como-dreamer.jpg",
+      ],
       "geo": {"lat": 45.984500, "lng": 9.250000}
     },
   ];
 
-  bool showList = false;
-  
+  bool _showList = false;
+
   String? _mapStyle;
 
   Set<Marker> _createMarkers() {
-    return boats
+    return _boats
         .map((boat) => Marker(
               markerId: MarkerId(boat["id"].toString()),
               position: LatLng(boat["geo"]["lat"], boat["geo"]["lng"]),
-              icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueAzure),
               infoWindow: InfoWindow(
-                title: boat["nomebarca"],
-                snippet: "€${boat["prezzoorario"]}/ora",
-                onTap: () => _showBoatCard(boat),
+                title: boat["name"],
+                snippet: "€${boat["price"]}/ora",
+                // onTap: () => _showBoatCard(boat),
+                onTap: () {
+                  setState(() => _selectedBoat = boat);
+                },
               ),
             ))
         .toSet();
-  }
-
-  void _showBoatCard(Map<String, dynamic> boat) {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(16)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              boat["nomebarca"],
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text("Comandante: ${boat["comandante"]}"),
-            Text("Prezzo orario: €${boat["prezzoorario"]}"),
-            SizedBox(height: 16),
-            Image.network(boat["foto"], height: 150, fit: BoxFit.cover),
-          ],
-        ),
-      ),
-    );
   }
 
   Future<void> _loadMapStyle() async {
@@ -124,6 +110,7 @@ class _BoatTourScreenState extends State<BoatTourScreen> {
       ),
       body: Stack(
         children: [
+          // Mappa di Google
           GoogleMap(
             style: _mapStyle,
             initialCameraPosition: CameraPosition(
@@ -132,7 +119,18 @@ class _BoatTourScreenState extends State<BoatTourScreen> {
             ),
             markers: _createMarkers(),
           ),
-          if (showList)
+          // Mostra la card quando una barca è selezionata
+          if (_selectedBoat != null)
+            BoatDetailCard(
+              name: _selectedBoat!["name"],
+              captain: _selectedBoat!["captain"],
+              price: _selectedBoat!["price"],
+              images: List<String>.from(_selectedBoat!["images"]),
+              onClose: () {
+                setState(() => _selectedBoat = null);
+              },
+            ),
+          if (_showList)
             Positioned(
               bottom: 0,
               left: 0,
@@ -145,19 +143,15 @@ class _BoatTourScreenState extends State<BoatTourScreen> {
                   boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
                 ),
                 child: ListView.builder(
-                  itemCount: boats.length,
+                  itemCount: _boats.length,
                   itemBuilder: (context, index) {
-                    final boat = boats[index];
-                    return ListTile(
-                      leading: Image.network(
-                        boat["foto"],
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                      ),
-                      title: Text(boat["nomebarca"]),
-                      subtitle: Text("€${boat["prezzoorario"]}/ora"),
-                      onTap: () => _showBoatCard(boat),
+                    final boat = _boats[index];
+                    return BoatDetailCard(
+                      name: boat["name"],
+                      captain: boat["captain"],
+                      price: boat["price"],
+                      images: List<String>.from(boat["images"]),
+                      onClose: () {},
                     );
                   },
                 ),
@@ -166,10 +160,10 @@ class _BoatTourScreenState extends State<BoatTourScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(showList ? Icons.map : Icons.list),
+        child: Icon(_showList ? Icons.map : Icons.list),
         onPressed: () {
           setState(() {
-            showList = !showList;
+            _showList = !_showList;
           });
         },
       ),
