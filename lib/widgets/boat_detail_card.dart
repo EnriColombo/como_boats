@@ -54,7 +54,8 @@ class _BoatDetailCardState extends State<BoatDetailCard> {
                       },
                       itemBuilder: (context, index) {
                         return ClipRRect(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(16)),
                           child: Image.network(
                             widget.images[index],
                             width: double.infinity,
@@ -63,6 +64,26 @@ class _BoatDetailCardState extends State<BoatDetailCard> {
                         );
                       },
                     ),
+                    // Pulsanti Preferiti e Chiudi
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.favorite_border,
+                                color: Colors.white),
+                            onPressed:
+                                () {}, // TODO: Aggiungi logica per i preferiti
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.close, color: Colors.white),
+                            onPressed: widget.onClose,
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Indicatori delle pagine del carosello
                     Positioned(
                       bottom: 8,
                       left: 0,
@@ -76,7 +97,9 @@ class _BoatDetailCardState extends State<BoatDetailCard> {
                             width: _currentPage == index ? 10 : 6,
                             height: 6,
                             decoration: BoxDecoration(
-                              color: _currentPage == index ? Colors.white : Colors.grey,
+                              color: _currentPage == index
+                                  ? Colors.white
+                                  : Colors.grey,
                               borderRadius: BorderRadius.circular(3),
                             ),
                           ),
@@ -93,7 +116,7 @@ class _BoatDetailCardState extends State<BoatDetailCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Nome della barca e icone
+                    // Nome della barca
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -105,18 +128,6 @@ class _BoatDetailCardState extends State<BoatDetailCard> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.favorite_border, color: Colors.black),
-                              onPressed: () {}, // TODO: Aggiungi logica per i preferiti
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.close, color: Colors.black),
-                              onPressed: widget.onClose,
-                            ),
-                          ],
                         ),
                       ],
                     ),
