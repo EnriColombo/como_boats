@@ -121,40 +121,44 @@ class _BoatMapScreenState extends State<BoatMapScreen> {
           ),
           // Mostra la card quando una barca è selezionata
           if (_selectedBoat != null)
-            BoatDetailCard(
-              name: _selectedBoat!["name"],
-              captain: _selectedBoat!["captain"],
-              price: _selectedBoat!["price"],
-              images: List<String>.from(_selectedBoat!["images"]),
-              onClose: () {
-                setState(() => _selectedBoat = null);
-              },
+            Positioned(
+              bottom: 20,
+              left: 16,
+              right: 16,
+              child: BoatDetailCard(
+                name: _selectedBoat!["name"],
+                captain: _selectedBoat!["captain"],
+                price: _selectedBoat!["price"],
+                images: List<String>.from(_selectedBoat!["images"]),
+                onClose: () {
+                  setState(() => _selectedBoat = null);
+                },
+              ),
             ),
           if (_showList)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                  boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
-                ),
-                child: ListView.builder(
-                  itemCount: _boats.length,
-                  itemBuilder: (context, index) {
-                    final boat = _boats[index];
-                    return BoatDetailCard(
+            Container(
+              padding: EdgeInsets.only(left: 16, right: 16),
+              height: MediaQuery.of(context).size.height,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
+              ),
+              child: ListView.builder(
+                itemCount: _boats.length,
+                itemBuilder: (context, index) {
+                  final boat = _boats[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 8),
+                    child: BoatDetailCard(
                       name: boat["name"],
                       captain: boat["captain"],
                       price: boat["price"],
                       images: List<String>.from(boat["images"]),
                       onClose: () {},
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
             ),
         ],
