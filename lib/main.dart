@@ -73,36 +73,88 @@ class _BoatMapScreenState extends State<BoatMapScreen> {
   String? _mapStyle;
   Set<Marker> _markers = {};
 
-  Future<Uint8List?> getBytesFromAsset(String path, int width) async {
-    ByteData data = await rootBundle.load(path);
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetWidth: width);
-    ui.FrameInfo fi = await codec.getNextFrame();
-    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))
-        ?.buffer
-        .asUint8List();
+  // Future<Uint8List?> getBytesFromAsset(String path, int width) async {
+  //   ByteData data = await rootBundle.load(path);
+  //   ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+  //       targetWidth: width);
+  //   ui.FrameInfo fi = await codec.getNextFrame();
+  //   return (await fi.image.toByteData(format: ui.ImageByteFormat.png))
+  //       ?.buffer
+  //       .asUint8List();
+  // }
+
+  Future<Uint8List?> _createCustomMarkerBitmap(String name, String price) async {
+    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+    final Paint paint = Paint()..color = Colors.white;
+    final Radius radius = Radius.circular(10.0);
+
+    // Draw the background rectangle
+    canvas.drawRRect(
+      RRect.fromRectAndCorners(
+        Rect.fromLTWH(0.0, 0.0, 100.0, 60.0),
+        topLeft: radius,
+        topRight: radius,
+        bottomLeft: radius,
+        bottomRight: radius,
+      ),
+      paint,
+    );
+
+    // Draw the text
+    TextPainter textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.text = TextSpan(
+      text: name,
+      style: TextStyle(
+        fontSize: 15.0,
+        color: Colors.black,
+      ),
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, Offset(10.0, 10.0));
+
+    textPainter.text = TextSpan(
+      text: "€$price/ora",
+      style: TextStyle(
+        fontSize: 12.0,
+        color: Colors.black,
+      ),
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, Offset(10.0, 40.0));
+
+    final ui.Image markerAsImage =
+        await pictureRecorder.endRecording().toImage(100, 60);
+    final ByteData? byteData =
+        await markerAsImage.toByteData(format: ui.ImageByteFormat.png);
+    return byteData?.buffer.asUint8List();
   }
 
   Future<void> _createMarkers() async {
-    final Uint8List? markerIcon =
-        await getBytesFromAsset('assets/images/pin_booking.png', 100);
-    final BitmapDescriptor bitmapDescriptor =
-        BitmapDescriptor.bytes(markerIcon!);
+    _markers = (await Future.wait(_boats.map((boat) async {
+      final Uint8List? markerIcon = await _createCustomMarkerBitmap(
+          boat["name"], boat["price"].toString());
+      final BitmapDescriptor bitmapDescriptor =
+          BitmapDescriptor.bytes(markerIcon!);
 
-    _markers = _boats
-        .map((boat) => Marker(
-              markerId: MarkerId(boat["id"].toString()),
-              position: LatLng(boat["geo"]["lat"], boat["geo"]["lng"]),
-              icon: bitmapDescriptor, // Transparent icon
-              // infoWindow: InfoWindow(
-              //   title: boat["name"],
-              //   snippet: "€${boat["price"]}/ora",
-              //   onTap: () {
-              //     setState(() => _selectedBoat = boat);
-              //   },
-              // ),
-            ))
+      return Marker(
+        markerId: MarkerId(boat["id"].toString()),
+        position: LatLng(boat["geo"]["lat"], boat["geo"]["lng"]),
+        icon: bitmapDescriptor,
+        infoWindow: InfoWindow(
+          title: boat["name"],
+          snippet: "€${boat["price"]}/ora",
+          onTap: () {
+            setState(() => _selectedBoat = boat);
+          },
+        ),
+      );
+    }).toList()))
         .toSet();
+
     setState(() {});
   }
 
