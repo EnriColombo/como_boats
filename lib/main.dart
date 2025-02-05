@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart' show Uint8List, rootBundle;
 import 'widgets/boat_detail_card.dart';
 
 void main() {
@@ -77,12 +77,10 @@ class _BoatMapScreenState extends State<BoatMapScreen> {
         .map((boat) => Marker(
               markerId: MarkerId(boat["id"].toString()),
               position: LatLng(boat["geo"]["lat"], boat["geo"]["lng"]),
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                  BitmapDescriptor.hueAzure),
+              icon: BitmapDescriptor.bytes(Uint8List(0)), // Transparent icon
               infoWindow: InfoWindow(
                 title: boat["name"],
                 snippet: "€${boat["price"]}/ora",
-                // onTap: () => _showBoatCard(boat),
                 onTap: () {
                   setState(() => _selectedBoat = boat);
                 },
