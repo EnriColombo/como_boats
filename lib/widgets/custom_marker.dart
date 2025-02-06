@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CustomMarker {
   static Future<Uint8List?> createCustomMarkerBitmap(
@@ -8,7 +9,8 @@ class CustomMarker {
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
     final Paint paint = Paint()..color = Colors.white;
-    final Paint shadowPaint = Paint()..color = Colors.black.withValues(alpha: 0.5);
+    final Paint shadowPaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.5);
     final Radius radius = Radius.circular(5.0);
 
     TextPainter textPainterName = TextPainter(
@@ -21,8 +23,8 @@ class CustomMarker {
     // Draw the title (name)
     textPainterName.text = TextSpan(
       text: title,
-      style: TextStyle(
-        fontSize: 15.0,
+      style: GoogleFonts.gloriaHallelujah(
+        fontSize: 14.0,
         color: Colors.black,
         fontWeight: FontWeight.bold,
       ),
@@ -35,7 +37,7 @@ class CustomMarker {
     String price = "€$snippet/ora";
     textPainterPrice.text = TextSpan(
       text: price,
-      style: TextStyle(
+      style: GoogleFonts.roboto(
         fontSize: 12.0,
         color: Colors.grey[700],
       ),
@@ -47,8 +49,8 @@ class CustomMarker {
 
     // Draw the background rectangle based on the title text size
     double padding = 8.0;
-    double verticalSpacing =
-        6.0; // Additional vertical space between name and price
+    // Additional vertical space between name and price
+    double verticalSpacing = 6.0;
     double arrowHeight = 8.0; // Height of the arrow
     double shadowOffset = 1.0; // Offset for the shadow
     double rectWidth = textWidth + padding;
@@ -57,7 +59,8 @@ class CustomMarker {
     // Draw the shadow rectangle
     canvas.drawRRect(
       RRect.fromRectAndCorners(
-        Rect.fromLTWH(shadowOffset, shadowOffset, rectWidth, rectHeight - arrowHeight),
+        Rect.fromLTWH(
+            shadowOffset, shadowOffset, rectWidth, rectHeight - arrowHeight),
         topLeft: radius,
         topRight: radius,
         bottomLeft: radius,
@@ -101,6 +104,5 @@ class CustomMarker {
     final ByteData? byteData =
         await markerAsImage.toByteData(format: ui.ImageByteFormat.png);
     return byteData?.buffer.asUint8List();
-
   }
 }
