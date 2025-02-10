@@ -26,11 +26,10 @@ class BoatMapScreen extends StatefulWidget {
   const BoatMapScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _BoatMapScreenState createState() => _BoatMapScreenState();
+  BoatMapScreenState createState() => BoatMapScreenState();
 }
 
-class _BoatMapScreenState extends State<BoatMapScreen> {
+class BoatMapScreenState extends State<BoatMapScreen> {
   final List<Map<String, dynamic>> _boats = [
     {
       "id": 1,
