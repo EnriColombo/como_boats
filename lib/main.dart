@@ -74,8 +74,9 @@ class _BoatMapScreenState extends State<BoatMapScreen> {
 
   Future<void> _createMarkers() async {
     _markers = (await Future.wait(_boats.map((boat) async {
-      final Uint8List? markerIcon = await CustomMarker.createCustomMarkerBitmap(
-          boat["name"], boat["price"].toString());
+      String name = boat["name"];
+      String price = "€${boat["price"]}/ora";
+      final Uint8List? markerIcon = await CustomMarker.createCustomMarkerBitmap(name, price);
       final BitmapDescriptor bitmapDescriptor =
           BitmapDescriptor.bytes(markerIcon!);
 
@@ -83,13 +84,16 @@ class _BoatMapScreenState extends State<BoatMapScreen> {
         markerId: MarkerId(boat["id"].toString()),
         position: LatLng(boat["geo"]["lat"], boat["geo"]["lng"]),
         icon: bitmapDescriptor,
-        infoWindow: InfoWindow(
-          title: boat["name"],
-          snippet: "€${boat["price"]}/ora",
-          onTap: () {
-            setState(() => _selectedBoat = boat);
-          },
-        ),
+        onTap: () {
+          setState(() => _selectedBoat = boat);
+        },
+        // infoWindow: InfoWindow(
+        //   title: name,
+        //   snippet: price,
+        //   onTap: () {
+        //     setState(() => _selectedBoat = boat);
+        //   },
+        // ),
       );
     }).toList()))
         .toSet();

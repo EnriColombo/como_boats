@@ -13,8 +13,8 @@ class CustomMarker {
       ..color = Colors.black.withValues(alpha: 0.5);
     final Radius radius = Radius.circular(5.0);
 
-    // Draw the title (name)
-    TextPainter textPainterName = TextPainter(
+    // Draw the title
+    TextPainter textPainterTitle = TextPainter(
       textDirection: TextDirection.ltr,
       text: TextSpan(
         text: title,
@@ -25,29 +25,29 @@ class CustomMarker {
         ),
       ),
     );
-    textPainterName.layout();
-    double textWidth = textPainterName.width;
-    double textHeight = textPainterName.height;
+    textPainterTitle.layout();
+    double textWidth = textPainterTitle.width;
+    double textHeight = textPainterTitle.height;
 
-    // Draw the snippet (price)
-    TextPainter textPainterPrice = TextPainter(
+    // Draw the snippet
+    TextPainter textPainterSnippet = TextPainter(
       textDirection: TextDirection.ltr,
       text: TextSpan(
-        text: "€$snippet/ora",
+        text: snippet,
         style: GoogleFonts.roboto(
           fontSize: 12.0,
           color: Colors.grey[700],
         ),
       ),
     );
-    textPainterPrice.layout();
+    textPainterSnippet.layout();
     textWidth =
-        textWidth > textPainterPrice.width ? textWidth : textPainterPrice.width;
-    textHeight += textPainterPrice.height;
+        textWidth > textPainterSnippet.width ? textWidth : textPainterSnippet.width;
+    textHeight += textPainterSnippet.height;
 
     // Draw the background rectangle based on the title text size
     double padding = 8.0;
-    // Additional vertical space between name and price
+    // Additional vertical space between title and snippet
     double verticalSpacing = 4.0;
     double arrowHeight = 8.0; // Height of the arrow
     double shadowOffset = 1.0; // Offset for the shadow
@@ -87,14 +87,14 @@ class CustomMarker {
     arrowPath.close();
     canvas.drawPath(arrowPath, paint);
 
-    // Draw the name over the rectangle
-    textPainterName.paint(canvas, Offset(padding / 2, padding / 2));
+    // Draw the title over the rectangle
+    textPainterTitle.paint(canvas, Offset(padding / 2, padding / 2));
 
-    // Draw the price over the rectangle with additional vertical space
-    textPainterPrice.paint(
+    // Draw the snippet over the rectangle with additional vertical space
+    textPainterSnippet.paint(
         canvas,
         Offset(padding / 2,
-            padding / 2 + textPainterName.height + verticalSpacing));
+            padding / 2 + textPainterTitle.height + verticalSpacing));
 
     final ui.Image markerAsImage = await pictureRecorder
         .endRecording()
