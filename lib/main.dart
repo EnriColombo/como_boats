@@ -70,12 +70,16 @@ class BoatMapScreenState extends State<BoatMapScreen> {
   bool _showList = false;
   String? _mapStyle;
   Set<Marker> _markers = {};
+  final DraggableScrollableController _draggableScrollableController =
+      DraggableScrollableController();
+  final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(false);
 
   Future<void> _createMarkers() async {
     _markers = (await Future.wait(_boats.map((boat) async {
       String name = boat["name"];
       String price = "€${boat["price"]}/ora";
-      final Uint8List? markerIcon = await CustomMarker.createCustomMarkerBitmap(name, price);
+      final Uint8List? markerIcon =
+          await CustomMarker.createCustomMarkerBitmap(name, price);
       final BitmapDescriptor bitmapDescriptor =
           BitmapDescriptor.bytes(markerIcon!);
 
@@ -150,6 +154,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
             initialChildSize: 0.08,
             minChildSize: 0.08,
             maxChildSize: 1.0,
+            controller: _draggableScrollableController,
             builder: (BuildContext context, ScrollController scrollController) {
               return Container(
                 decoration: BoxDecoration(
@@ -205,12 +210,40 @@ class BoatMapScreenState extends State<BoatMapScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(_showList ? Icons.map : Icons.list),
-        onPressed: () {
-          setState(() {
-            _showList = !_showList;
-          });
+      // floatingActionButton: FloatingActionButton(
+      //   child: Icon(_showList ? Icons.map : Icons.list),
+      //   onPressed: () {
+      //     setState(() {
+      //       _showList = !_showList;
+      //     });
+      //   },
+      // ),
+      floatingActionButton: ValueListenableBuilder<bool>(
+        valueListenable: _fabVisible,
+        builder: (context, isVisible, child) {
+          return isVisible
+              ? FloatingActionButton(
+                  child: Icon(_showList ? Icons.map : Icons.list),
+                  onPressed: () {
+                    setState(() {
+                      _showList = !_showList;
+                      if (_showList) {
+                        _draggableScrollableController.animateTo(
+                          1.0,
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                        );
+                      } else {
+                        _draggableScrollableController.animateTo(
+                          0.08,
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    });
+                  },
+                )
+              : SizedBox.shrink();
         },
       ),
     );
