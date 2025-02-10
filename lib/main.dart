@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart' show Uint8List, rootBundle;
 import 'widgets/boat_detail_card.dart';
+import 'widgets/custom_marker.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,8 +31,6 @@ class BoatMapScreen extends StatefulWidget {
 }
 
 class _BoatMapScreenState extends State<BoatMapScreen> {
-  Map<String, dynamic>? _selectedBoat;
-
   final List<Map<String, dynamic>> _boats = [
     {
       "id": 1,
@@ -68,27 +67,34 @@ class _BoatMapScreenState extends State<BoatMapScreen> {
     },
   ];
 
+  Map<String, dynamic>? _selectedBoat;
   bool _showList = false;
-
   String? _mapStyle;
+  Set<Marker> _markers = {};
 
-  Set<Marker> _createMarkers() {
-    return _boats
-        .map((boat) => Marker(
-              markerId: MarkerId(boat["id"].toString()),
-              position: LatLng(boat["geo"]["lat"], boat["geo"]["lng"]),
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                  BitmapDescriptor.hueAzure),
-              infoWindow: InfoWindow(
-                title: boat["name"],
-                snippet: "€${boat["price"]}/ora",
-                // onTap: () => _showBoatCard(boat),
-                onTap: () {
-                  setState(() => _selectedBoat = boat);
-                },
-              ),
-            ))
+  Future<void> _createMarkers() async {
+    _markers = (await Future.wait(_boats.map((boat) async {
+      final Uint8List? markerIcon = await CustomMarker.createCustomMarkerBitmap(
+          boat["name"], boat["price"].toString());
+      final BitmapDescriptor bitmapDescriptor =
+          BitmapDescriptor.bytes(markerIcon!);
+
+      return Marker(
+        markerId: MarkerId(boat["id"].toString()),
+        position: LatLng(boat["geo"]["lat"], boat["geo"]["lng"]),
+        icon: bitmapDescriptor,
+        infoWindow: InfoWindow(
+          title: boat["name"],
+          snippet: "€${boat["price"]}/ora",
+          onTap: () {
+            setState(() => _selectedBoat = boat);
+          },
+        ),
+      );
+    }).toList()))
         .toSet();
+
+    setState(() {});
   }
 
   Future<void> _loadMapStyle() async {
@@ -100,6 +106,7 @@ class _BoatMapScreenState extends State<BoatMapScreen> {
   void initState() {
     super.initState();
     _loadMapStyle();
+    _createMarkers();
   }
 
   @override
@@ -117,7 +124,7 @@ class _BoatMapScreenState extends State<BoatMapScreen> {
               target: LatLng(45.98661616223449, 9.257043874433045),
               zoom: 14,
             ),
-            markers: _createMarkers(),
+            markers: _markers,
           ),
           // Mostra la card quando una barca è selezionata
           if (_selectedBoat != null)
