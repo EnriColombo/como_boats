@@ -72,6 +72,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
   final DraggableScrollableController _draggableScrollableController =
       DraggableScrollableController();
   final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(false);
+  ScrollController _listScrollController = ScrollController();
 
   Future<void> _createMarkers() async {
     _markers = (await Future.wait(_boats.map((boat) async {
@@ -126,11 +127,14 @@ class BoatMapScreenState extends State<BoatMapScreen> {
   void dispose() {
     _draggableScrollableController.dispose();
     _fabVisible.dispose();
+    _listScrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Inizializza la grandezza iniziale del pannello draggable
+    var initialChildSize = 0.08;
     return Scaffold(
       appBar: AppBar(
         title: Text('Boat Tours Lago di Como'),
@@ -145,11 +149,20 @@ class BoatMapScreenState extends State<BoatMapScreen> {
               zoom: 14,
             ),
             markers: _markers,
+            onTap: (LatLng latLng) {
+              setState(() {
+                _draggableScrollableController.animateTo(
+                  0.08,
+                  duration: Duration(milliseconds: 500),
+                  curve: Curves.easeInOut,
+                );
+              });
+            },
           ),
           // Mostra la card quando una barca è selezionata
           if (_selectedBoat != null)
             Positioned(
-              bottom: 20,
+              bottom: 60,
               left: 16,
               right: 16,
               child: BoatDetailCard(
@@ -164,11 +177,12 @@ class BoatMapScreenState extends State<BoatMapScreen> {
             ),
           // Pannello draggable della lista delle barche
           DraggableScrollableSheet(
-            initialChildSize: 0.08,
-            minChildSize: 0.08,
+            initialChildSize: initialChildSize,
+            minChildSize: initialChildSize,
             maxChildSize: 1.0,
             controller: _draggableScrollableController,
             builder: (BuildContext context, ScrollController scrollController) {
+              _listScrollController = scrollController;
               return Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -201,7 +215,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                     // Lista delle barche
                     Expanded(
                       child: ListView.builder(
-                        controller: scrollController,
+                        controller: _listScrollController,
                         itemCount: _boats.length,
                         itemBuilder: (context, index) {
                           final boat = _boats[index];
@@ -235,10 +249,15 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                   onPressed: () {
                     setState(() {
                       _draggableScrollableController.animateTo(
-                        0.08,
+                        initialChildSize,
                         duration: Duration(milliseconds: 500),
                         curve: Curves.easeInOut,
                       );
+                      _listScrollController.animateTo(
+                        0.0,
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                      );                      
                     });
                   },
                 )
