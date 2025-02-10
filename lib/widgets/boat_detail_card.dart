@@ -17,10 +17,10 @@ class BoatDetailCard extends StatefulWidget {
   });
 
   @override
-  _BoatDetailCardState createState() => _BoatDetailCardState();
+  BoatDetailCardState createState() => BoatDetailCardState();
 }
 
-class _BoatDetailCardState extends State<BoatDetailCard> {
+class BoatDetailCardState extends State<BoatDetailCard> {
   int _currentPage = 0;
   final PageController _pageController = PageController();
 
