@@ -67,15 +67,19 @@ class BoatMapScreenState extends State<BoatMapScreen> {
   ];
 
   Map<String, dynamic>? _selectedBoat;
-  bool _showList = false;
   String? _mapStyle;
   Set<Marker> _markers = {};
+  final DraggableScrollableController _draggableScrollableController =
+      DraggableScrollableController();
+  final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(false);
+  ScrollController _listScrollController = ScrollController();
 
   Future<void> _createMarkers() async {
     _markers = (await Future.wait(_boats.map((boat) async {
       String name = boat["name"];
       String price = "€${boat["price"]}/ora";
-      final Uint8List? markerIcon = await CustomMarker.createCustomMarkerBitmap(name, price);
+      final Uint8List? markerIcon =
+          await CustomMarker.createCustomMarkerBitmap(name, price);
       final BitmapDescriptor bitmapDescriptor =
           BitmapDescriptor.bytes(markerIcon!);
 
@@ -110,10 +114,27 @@ class BoatMapScreenState extends State<BoatMapScreen> {
     super.initState();
     _loadMapStyle();
     _createMarkers();
+    _draggableScrollableController.addListener(() {
+      if (_draggableScrollableController.size > 0.1) {
+        _fabVisible.value = true;
+      } else {
+        _fabVisible.value = false;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _draggableScrollableController.dispose();
+    _fabVisible.dispose();
+    _listScrollController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Inizializza la grandezza iniziale del pannello draggable
+    var initialChildSize = 0.08;
     return Scaffold(
       appBar: AppBar(
         title: Text('Boat Tours Lago di Como'),
@@ -128,11 +149,20 @@ class BoatMapScreenState extends State<BoatMapScreen> {
               zoom: 14,
             ),
             markers: _markers,
+            onTap: (LatLng latLng) {
+              setState(() {
+                _draggableScrollableController.animateTo(
+                  0.08,
+                  duration: Duration(milliseconds: 500),
+                  curve: Curves.easeInOut,
+                );
+              });
+            },
           ),
           // Mostra la card quando una barca è selezionata
           if (_selectedBoat != null)
             Positioned(
-              bottom: 20,
+              bottom: 60,
               left: 16,
               right: 16,
               child: BoatDetailCard(
@@ -145,40 +175,93 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                 },
               ),
             ),
-          if (_showList)
-            Container(
-              padding: EdgeInsets.only(left: 16, right: 16),
-              height: MediaQuery.of(context).size.height,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
-              ),
-              child: ListView.builder(
-                itemCount: _boats.length,
-                itemBuilder: (context, index) {
-                  final boat = _boats[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 8),
-                    child: BoatDetailCard(
-                      name: boat["name"],
-                      captain: boat["captain"],
-                      price: boat["price"],
-                      images: List<String>.from(boat["images"]),
-                      onClose: () {},
+          // Pannello draggable della lista delle barche
+          DraggableScrollableSheet(
+            initialChildSize: initialChildSize,
+            minChildSize: initialChildSize,
+            maxChildSize: 1.0,
+            controller: _draggableScrollableController,
+            builder: (BuildContext context, ScrollController scrollController) {
+              _listScrollController = scrollController;
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                  boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
+                ),
+                child: Column(
+                  children: [
+                    // Handle bar
+                    Container(
+                      margin: const EdgeInsets.only(top: 8.0),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                  );
-                },
-              ),
-            ),
+                    // Numero di barche disponibili
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        '${_boats.length} boats available',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    // Lista delle barche
+                    Expanded(
+                      child: ListView.builder(
+                        controller: _listScrollController,
+                        itemCount: _boats.length,
+                        itemBuilder: (context, index) {
+                          final boat = _boats[index];
+                          return Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: BoatDetailCard(
+                              name: boat["name"],
+                              captain: boat["captain"],
+                              price: boat["price"],
+                              images: List<String>.from(boat["images"]),
+                              onClose: () {},
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(_showList ? Icons.map : Icons.list),
-        onPressed: () {
-          setState(() {
-            _showList = !_showList;
-          });
+      // Floating Action Button per tornare alla mappa
+      floatingActionButton: ValueListenableBuilder<bool>(
+        valueListenable: _fabVisible,
+        builder: (context, isVisible, child) {
+          return isVisible
+              ? FloatingActionButton(
+                  child: Icon(Icons.map),
+                  onPressed: () {
+                    setState(() {
+                      _draggableScrollableController.animateTo(
+                        initialChildSize,
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                      );
+                      _listScrollController.animateTo(
+                        0.0,
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                      );                      
+                    });
+                  },
+                )
+              : SizedBox.shrink();
         },
       ),
     );
