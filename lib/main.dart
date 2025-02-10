@@ -157,22 +157,38 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                   boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
                 ),
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: _boats.length,
-                  itemBuilder: (context, index) {
-                    final boat = _boats[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 8),
-                      child: BoatDetailCard(
-                        name: boat["name"],
-                        captain: boat["captain"],
-                        price: boat["price"],
-                        images: List<String>.from(boat["images"]),
-                        onClose: () {},
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        '${_boats.length} boats available',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    );
-                  },
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemCount: _boats.length,
+                        itemBuilder: (context, index) {
+                          final boat = _boats[index];
+                          return Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: BoatDetailCard(
+                              name: boat["name"],
+                              captain: boat["captain"],
+                              price: boat["price"],
+                              images: List<String>.from(boat["images"]),
+                              onClose: () {},
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
