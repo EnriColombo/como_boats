@@ -147,8 +147,8 @@ class BoatMapScreenState extends State<BoatMapScreen> {
             ),
           // Lista delle barche
           DraggableScrollableSheet(
-            initialChildSize: 0.1,
-            minChildSize: 0.1,
+            initialChildSize: 0.08,
+            minChildSize: 0.08,
             maxChildSize: 1.0,
             builder: (BuildContext context, ScrollController scrollController) {
               return Container(
@@ -159,6 +159,16 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                 ),
                 child: Column(
                   children: [
+                    // Handle bar
+                    Container(
+                      margin: const EdgeInsets.only(top: 8.0),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
