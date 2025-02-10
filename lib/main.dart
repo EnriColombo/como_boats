@@ -145,32 +145,38 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                 },
               ),
             ),
-          if (_showList)
-            Container(
-              padding: EdgeInsets.only(left: 16, right: 16),
-              height: MediaQuery.of(context).size.height,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
-              ),
-              child: ListView.builder(
-                itemCount: _boats.length,
-                itemBuilder: (context, index) {
-                  final boat = _boats[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 8),
-                    child: BoatDetailCard(
-                      name: boat["name"],
-                      captain: boat["captain"],
-                      price: boat["price"],
-                      images: List<String>.from(boat["images"]),
-                      onClose: () {},
-                    ),
-                  );
-                },
-              ),
-            ),
+          // Lista delle barche
+          DraggableScrollableSheet(
+            initialChildSize: 0.1,
+            minChildSize: 0.1,
+            maxChildSize: 1.0,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                  boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
+                ),
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: _boats.length,
+                  itemBuilder: (context, index) {
+                    final boat = _boats[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 8),
+                      child: BoatDetailCard(
+                        name: boat["name"],
+                        captain: boat["captain"],
+                        price: boat["price"],
+                        images: List<String>.from(boat["images"]),
+                        onClose: () {},
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
