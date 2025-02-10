@@ -67,7 +67,6 @@ class BoatMapScreenState extends State<BoatMapScreen> {
   ];
 
   Map<String, dynamic>? _selectedBoat;
-  bool _showList = false;
   String? _mapStyle;
   Set<Marker> _markers = {};
   final DraggableScrollableController _draggableScrollableController =
@@ -114,6 +113,20 @@ class BoatMapScreenState extends State<BoatMapScreen> {
     super.initState();
     _loadMapStyle();
     _createMarkers();
+    _draggableScrollableController.addListener(() {
+      if (_draggableScrollableController.size > 0.1) {
+        _fabVisible.value = true;
+      } else {
+        _fabVisible.value = false;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _draggableScrollableController.dispose();
+    _fabVisible.dispose();
+    super.dispose();
   }
 
   @override
@@ -149,7 +162,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                 },
               ),
             ),
-          // Lista delle barche
+          // Pannello draggable della lista delle barche
           DraggableScrollableSheet(
             initialChildSize: 0.08,
             minChildSize: 0.08,
@@ -174,6 +187,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
+                    // Numero di barche disponibili
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
@@ -184,6 +198,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                         ),
                       ),
                     ),
+                    // Lista delle barche
                     Expanded(
                       child: ListView.builder(
                         controller: scrollController,
@@ -210,36 +225,20 @@ class BoatMapScreenState extends State<BoatMapScreen> {
           ),
         ],
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   child: Icon(_showList ? Icons.map : Icons.list),
-      //   onPressed: () {
-      //     setState(() {
-      //       _showList = !_showList;
-      //     });
-      //   },
-      // ),
+      // Floating Action Button per tornare alla mappa
       floatingActionButton: ValueListenableBuilder<bool>(
         valueListenable: _fabVisible,
         builder: (context, isVisible, child) {
           return isVisible
               ? FloatingActionButton(
-                  child: Icon(_showList ? Icons.map : Icons.list),
+                  child: Icon(Icons.map),
                   onPressed: () {
                     setState(() {
-                      _showList = !_showList;
-                      if (_showList) {
-                        _draggableScrollableController.animateTo(
-                          1.0,
-                          duration: Duration(milliseconds: 500),
-                          curve: Curves.easeInOut,
-                        );
-                      } else {
-                        _draggableScrollableController.animateTo(
-                          0.08,
-                          duration: Duration(milliseconds: 500),
-                          curve: Curves.easeInOut,
-                        );
-                      }
+                      _draggableScrollableController.animateTo(
+                        0.08,
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                      );
                     });
                   },
                 )
