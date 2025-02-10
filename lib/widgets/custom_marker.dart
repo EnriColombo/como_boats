@@ -13,20 +13,16 @@ class CustomMarker {
       ..color = Colors.black.withValues(alpha: 0.5);
     final Radius radius = Radius.circular(5.0);
 
+    // Draw the title (name)
     TextPainter textPainterName = TextPainter(
       textDirection: TextDirection.ltr,
-    );
-    TextPainter textPainterPrice = TextPainter(
-      textDirection: TextDirection.ltr,
-    );
-
-    // Draw the title (name)
-    textPainterName.text = TextSpan(
-      text: title,
-      style: GoogleFonts.gloriaHallelujah(
-        fontSize: 14.0,
-        color: Colors.black,
-        fontWeight: FontWeight.bold,
+      text: TextSpan(
+        text: title,
+        style: GoogleFonts.roboto(
+          fontSize: 14.0,
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
     textPainterName.layout();
@@ -34,12 +30,14 @@ class CustomMarker {
     double textHeight = textPainterName.height;
 
     // Draw the snippet (price)
-    String price = "€$snippet/ora";
-    textPainterPrice.text = TextSpan(
-      text: price,
-      style: GoogleFonts.roboto(
-        fontSize: 12.0,
-        color: Colors.grey[700],
+    TextPainter textPainterPrice = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: TextSpan(
+        text: "€$snippet/ora",
+        style: GoogleFonts.roboto(
+          fontSize: 12.0,
+          color: Colors.grey[700],
+        ),
       ),
     );
     textPainterPrice.layout();
@@ -50,7 +48,7 @@ class CustomMarker {
     // Draw the background rectangle based on the title text size
     double padding = 8.0;
     // Additional vertical space between name and price
-    double verticalSpacing = 6.0;
+    double verticalSpacing = 4.0;
     double arrowHeight = 8.0; // Height of the arrow
     double shadowOffset = 1.0; // Offset for the shadow
     double rectWidth = textWidth + padding;
