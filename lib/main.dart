@@ -152,7 +152,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
             onTap: (LatLng latLng) {
               setState(() {
                 _draggableScrollableController.animateTo(
-                  0.08,
+                  initialChildSize,
                   duration: Duration(milliseconds: 500),
                   curve: Curves.easeInOut,
                 );
@@ -191,25 +191,40 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                 ),
                 child: Column(
                   children: [
-                    // Handle bar
-                    Container(
-                      margin: const EdgeInsets.only(top: 8.0),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    // Numero di barche disponibili
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        '${_boats.length} boats available',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _draggableScrollableController.animateTo(
+                            0.8,
+                            duration: Duration(milliseconds: 500),
+                            curve: Curves.easeInOut,
+                          );
+                        });
+                      },
+                      child: Column(
+                        children: [
+                          // Handle bar
+                          Container(
+                            margin: const EdgeInsets.only(top: 8.0),
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.grey,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          // Numero di barche disponibili
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              '${_boats.length} barche disponibili',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     // Lista delle barche
@@ -257,7 +272,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                         0.0,
                         duration: Duration(milliseconds: 500),
                         curve: Curves.easeInOut,
-                      );                      
+                      );
                     });
                   },
                 )
