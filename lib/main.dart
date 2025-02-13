@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
+import 'screens/boat_detail_page.dart';
 import 'widgets/boat_detail_card.dart';
 import 'widgets/custom_marker.dart';
 
@@ -173,6 +174,21 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                 captain: _selectedBoat!["captain"],
                 price: _selectedBoat!["price"],
                 images: List<String>.from(_selectedBoat!["images"]),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BoatDetailPage(
+                        name: _selectedBoat!["name"],
+                        captain: _selectedBoat!["captain"],
+                        price: _selectedBoat!["price"],
+                        description:
+                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc nec ultricies ultricies, nunc.",
+                        images: List<String>.from(_selectedBoat!["images"]),
+                      ),
+                    ),
+                  );
+                },
                 onClose: () {
                   setState(() => _selectedBoat = null);
                 },
@@ -244,7 +260,22 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                               captain: boat["captain"],
                               price: boat["price"],
                               images: List<String>.from(boat["images"]),
-                              onClose: () {},
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => BoatDetailPage(
+                                      name: boat["name"],
+                                      captain: boat["captain"],
+                                      price: boat["price"],
+                                      description:
+                                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc nec ultricies ultricies, nunc.",
+                                      images: List<String>.from(
+                                          boat["images"]),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           );
                         },
