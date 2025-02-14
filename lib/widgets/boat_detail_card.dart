@@ -76,10 +76,11 @@ class BoatDetailCardState extends State<BoatDetailCard> {
                             onPressed:
                                 () {}, // TODO: Aggiungi logica per i preferiti
                           ),
-                          IconButton(
-                            icon: Icon(Icons.close, color: Colors.white),
-                            onPressed: widget.onClose,
-                          ),
+                          if (widget.onClose != null)
+                            IconButton(
+                              icon: Icon(Icons.close, color: Colors.white),
+                              onPressed: widget.onClose,
+                            ),
                         ],
                       ),
                     ),
@@ -109,7 +110,7 @@ class BoatDetailCardState extends State<BoatDetailCard> {
                   ],
                 ),
               ),
-      
+
               // Dettagli della barca
               Padding(
                 padding: EdgeInsets.all(16),
@@ -131,15 +132,15 @@ class BoatDetailCardState extends State<BoatDetailCard> {
                         ),
                       ],
                     ),
-      
+
                     // Nome del comandante
                     Text(
                       "Capitano: ${widget.captain}",
                       style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                     ),
-      
+
                     SizedBox(height: 4),
-      
+
                     // Prezzo orario
                     Text(
                       "€${widget.price.toStringAsFixed(2)} / ora",

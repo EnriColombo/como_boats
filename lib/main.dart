@@ -155,6 +155,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
             markers: _markers,
             onTap: (LatLng latLng) {
               setState(() {
+                _selectedBoat = null;
                 _draggableScrollableController.animateTo(
                   initialChildSize,
                   duration: Duration(milliseconds: 500),
@@ -210,6 +211,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                 ),
                 child: Column(
                   children: [
+                    // Tap sulla barra di trascinamento per l'apertura immediata del pannello
                     GestureDetector(
                       onTap: () {
                         setState(() {
@@ -297,6 +299,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                   child: Icon(Icons.map),
                   onPressed: () {
                     setState(() {
+                      _selectedBoat = null;
                       _draggableScrollableController.animateTo(
                         initialChildSize,
                         duration: Duration(milliseconds: 500),
