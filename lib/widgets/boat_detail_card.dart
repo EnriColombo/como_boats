@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../models/boat.dart';
+
 class BoatDetailCard extends StatefulWidget {
   final String name;
   final String captain;
@@ -17,6 +19,17 @@ class BoatDetailCard extends StatefulWidget {
     this.onTap,
     super.key,
   });
+
+  factory BoatDetailCard.fromBoat(Boat boat, {VoidCallback? onClose, VoidCallback? onTap}) {
+    return BoatDetailCard(
+      name: boat.name,
+      captain: boat.captain,
+      price: boat.price,
+      images: boat.images,
+      onClose: onClose,
+      onTap: onTap,
+    );
+  }
 
   @override
   BoatDetailCardState createState() => BoatDetailCardState();

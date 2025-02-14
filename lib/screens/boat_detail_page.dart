@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/boat.dart';
 import '../widgets/image_carousel.dart';
 
 class BoatDetailPage extends StatelessWidget {
@@ -12,7 +13,6 @@ class BoatDetailPage extends StatelessWidget {
   final String company;
   final String tourDescription;
 
-  // TODO: Modificare passando un oggetto Boat (model)
   const BoatDetailPage({
     super.key,
     required this.name,
@@ -26,6 +26,18 @@ class BoatDetailPage extends StatelessWidget {
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse potenti. Nulla facilisi.',
   });
 
+  BoatDetailPage.fromBoat({
+    super.key,
+    required Boat boat,
+  })  : name = boat.name,
+        captain = boat.captain,
+        price = boat.price,
+        images = boat.images,
+        description = boat.description,
+        company = boat.company,
+        tourDescription = 
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse potenti. Nulla facilisi.';
+        
   @override
   Widget build(BuildContext context) {
     return Scaffold(
