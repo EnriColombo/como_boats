@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
+import 'models/company.dart';
 import 'screens/boat_detail_page.dart';
 import 'widgets/boat_detail_card.dart';
 import 'widgets/custom_marker.dart';
@@ -49,7 +50,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
       lng: 9.257043874433045,
       description:
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc nec ultricies ultricies, nunc.",
-      company: "Como Boats Inc.",
+      company: Company(id: 1, name: "Como Boats Inc.", webAddress: 'https://taxiboatlierna.it/'),
     ),
     Boat(
       id: 2,
@@ -64,7 +65,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
       lng: 9.257900,
       description:
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc nec ultricies ultricies, nunc.",
-      company: "Como Boats Inc.",
+      company: Company(id: 1, name: "Como Boats Inc.", webAddress: 'https://taxiboatlierna.it/'),
     ),
     Boat(
       id: 3,
@@ -79,7 +80,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
       lng: 9.250000,
       description:
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc nec ultricies ultricies, nunc.",
-      company: "Como Boats Inc.",
+      company: Company(id: 1, name: "Como Boats Inc.", webAddress: 'https://taxiboatlierna.it/'),
     ),
   ];
 

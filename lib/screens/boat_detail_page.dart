@@ -3,41 +3,15 @@ import '../models/boat.dart';
 import '../widgets/image_carousel.dart';
 
 class BoatDetailPage extends StatelessWidget {
-  final String name;
-  final String captain;
-  final double price;
-  final List<String> images;
-
-  // Altri dati inventati
-  final String description;
-  final String company;
+  final Boat boat;
   final String tourDescription;
 
-  const BoatDetailPage({
+  const BoatDetailPage.fromBoat({
     super.key,
-    required this.name,
-    required this.captain,
-    required this.price,
-    required this.images,
-    this.description =
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur consequat in mi in tempus.',
-    this.company = 'Como Boats Inc.',
-    this.tourDescription =
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse potenti. Nulla facilisi.',
-  });
+    required this.boat,
+  })  : tourDescription =
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse potenti. Nulla facilisi.';
 
-  BoatDetailPage.fromBoat({
-    super.key,
-    required Boat boat,
-  })  : name = boat.name,
-        captain = boat.captain,
-        price = boat.price,
-        images = boat.images,
-        description = boat.description,
-        company = boat.company,
-        tourDescription = 
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse potenti. Nulla facilisi.';
-        
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +35,7 @@ class BoatDetailPage extends StatelessWidget {
             // Carosello delle foto
             SizedBox(
               height: 300,
-              child: ImageCarousel(images: images),
+              child: ImageCarousel(images: boat.images),
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -70,13 +44,13 @@ class BoatDetailPage extends StatelessWidget {
                 children: [
                   // Nome della barca
                   Text(
-                    name,
+                    boat.name,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   SizedBox(height: 8),
                   // Descrizione della barca
                   Text(
-                    description,
+                    boat.description,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   SizedBox(height: 16),
@@ -85,21 +59,22 @@ class BoatDetailPage extends StatelessWidget {
                     children: [
                       Text('Capitano: ',
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(captain),
+                      Text(boat.captain),
                     ],
                   ),
                   SizedBox(height: 8),
-                  // Nome della società con fake link
+                  // Nome della società con link
                   Row(
                     children: [
                       Text('Società: ',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       GestureDetector(
                         onTap: () {
-                          // Abilita il link false
+                          // TODO: Abilita il link per la società
+                          // boat.company.webAddress;
                         },
                         child: Text(
-                          company,
+                          boat.company.name,
                           style: TextStyle(
                             color: Colors.blue,
                             decoration: TextDecoration.underline,
@@ -122,7 +97,7 @@ class BoatDetailPage extends StatelessWidget {
                   SizedBox(height: 16),
                   // Prezzo
                   Text(
-                    'Prezzo: €$price/ora',
+                    'Prezzo: €${boat.price}/ora',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   SizedBox(height: 32),
