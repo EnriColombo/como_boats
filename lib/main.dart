@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
+import 'models/company.dart';
+import 'screens/boat_detail_page.dart';
 import 'widgets/boat_detail_card.dart';
 import 'widgets/custom_marker.dart';
+import 'models/boat.dart';
 
 void main() {
   runApp(MyApp());
@@ -33,43 +36,55 @@ class BoatMapScreen extends StatefulWidget {
 }
 
 class BoatMapScreenState extends State<BoatMapScreen> {
-  final List<Map<String, dynamic>> _boats = [
-    {
-      "id": 1,
-      "name": "Perla del Lago",
-      "captain": "Enrico",
-      "price": 250.00,
-      "images": [
+  final List<Boat> _boats = [
+    Boat(
+      id: 1,
+      name: "Perla del Lago",
+      captain: "Enrico",
+      price: 250.00,
+      images: [
         "https://taxiboatlierna.it/images/limo/venetian_limousine_principale.jpg",
         "https://taxiboatlierna.it/images/limo/venetian_limousine_principale.jpg",
       ],
-      "geo": {"lat": 45.98661616223449, "lng": 9.257043874433045}
-    },
-    {
-      "id": 2,
-      "name": "Vento di Como",
-      "captain": "Marco",
-      "price": 200.00,
-      "images": [
+      lat: 45.98661616223449,
+      lng: 9.257043874433045,
+      description:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc nec ultricies ultricies, nunc.",
+      company: Company(id: 1, name: "Como Boats Inc.", webAddress: 'https://taxiboatlierna.it/'),
+    ),
+    Boat(
+      id: 2,
+      name: "Vento di Como",
+      captain: "Marco",
+      price: 200.00,
+      images: [
         "https://taxiboatlierna.it/images/venice/classicvenice_principale.jpg",
         "https://taxiboatlierna.it/images/venice/classicvenice_principale.jpg",
       ],
-      "geo": {"lat": 45.991224, "lng": 9.257900}
-    },
-    {
-      "id": 3,
-      "name": "Onde Blu",
-      "captain": "Alessandro",
-      "price": 180.00,
-      "images": [
+      lat: 45.991224,
+      lng: 9.257900,
+      description:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc nec ultricies ultricies, nunc.",
+      company: Company(id: 1, name: "Como Boats Inc.", webAddress: 'https://taxiboatlierna.it/'),
+    ),
+    Boat(
+      id: 3,
+      name: "Onde Blu",
+      captain: "Alessandro",
+      price: 180.00,
+      images: [
         "https://taxiboatlierna.it/images/flotta/como-dreamer.jpg",
         "https://taxiboatlierna.it/images/flotta/como-dreamer.jpg",
       ],
-      "geo": {"lat": 45.984500, "lng": 9.250000}
-    },
+      lat: 45.984500,
+      lng: 9.250000,
+      description:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc nec ultricies ultricies, nunc.",
+      company: Company(id: 1, name: "Como Boats Inc.", webAddress: 'https://taxiboatlierna.it/'),
+    ),
   ];
 
-  Map<String, dynamic>? _selectedBoat;
+  Boat? _selectedBoat;
   String? _mapStyle;
   Set<Marker> _markers = {};
   final DraggableScrollableController _draggableScrollableController =
@@ -79,16 +94,16 @@ class BoatMapScreenState extends State<BoatMapScreen> {
 
   Future<void> _createMarkers() async {
     _markers = (await Future.wait(_boats.map((boat) async {
-      String name = boat["name"];
-      String price = "€${boat["price"]}/ora";
+      String name = boat.name;
+      String price = "€${boat.price}/ora";
       final Uint8List? markerIcon =
           await CustomMarker.createCustomMarkerBitmap(name, price);
       final BitmapDescriptor bitmapDescriptor =
           BitmapDescriptor.bytes(markerIcon!);
 
       return Marker(
-        markerId: MarkerId(boat["id"].toString()),
-        position: LatLng(boat["geo"]["lat"], boat["geo"]["lng"]),
+        markerId: MarkerId(boat.id.toString()),
+        position: LatLng(boat.lat, boat.lng),
         icon: bitmapDescriptor,
         onTap: () {
           setState(() => _selectedBoat = boat);
@@ -154,6 +169,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
             markers: _markers,
             onTap: (LatLng latLng) {
               setState(() {
+                _selectedBoat = null;
                 _draggableScrollableController.animateTo(
                   initialChildSize,
                   duration: Duration(milliseconds: 500),
@@ -168,14 +184,21 @@ class BoatMapScreenState extends State<BoatMapScreen> {
               bottom: 60,
               left: 16,
               right: 16,
-              child: BoatDetailCard(
-                name: _selectedBoat!["name"],
-                captain: _selectedBoat!["captain"],
-                price: _selectedBoat!["price"],
-                images: List<String>.from(_selectedBoat!["images"]),
-                onClose: () {
-                  setState(() => _selectedBoat = null);
-                },
+              child: BoatDetailCard.fromBoat(
+              _selectedBoat!,
+              onTap: () {
+                Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BoatDetailPage.fromBoat(
+                  boat: _selectedBoat!,
+                  ),
+                ),
+                );
+              },
+              onClose: () {
+                setState(() => _selectedBoat = null);
+              },
               ),
             ),
           // Pannello draggable della lista delle barche
@@ -194,6 +217,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                 ),
                 child: Column(
                   children: [
+                    // Tap sulla barra di trascinamento per l'apertura immediata del pannello
                     GestureDetector(
                       onTap: () {
                         setState(() {
@@ -239,12 +263,18 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                           final boat = _boats[index];
                           return Padding(
                             padding: const EdgeInsets.all(16.0),
-                            child: BoatDetailCard(
-                              name: boat["name"],
-                              captain: boat["captain"],
-                              price: boat["price"],
-                              images: List<String>.from(boat["images"]),
-                              onClose: () {},
+                            child: BoatDetailCard.fromBoat(
+                              boat,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => BoatDetailPage.fromBoat(
+                                      boat: boat,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           );
                         },
@@ -266,6 +296,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                   child: Icon(Icons.map),
                   onPressed: () {
                     setState(() {
+                      _selectedBoat = null;
                       _draggableScrollableController.animateTo(
                         initialChildSize,
                         duration: Duration(milliseconds: 500),
