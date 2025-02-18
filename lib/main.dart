@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart' show Uint8List, rootBundle;
-import 'models/company.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'models/boat.dart';
 import 'screens/boat_detail_page.dart';
 import 'widgets/boat_detail_card.dart';
 import 'widgets/custom_marker.dart';
-import 'models/boat.dart';
 
-void main() {
+const supabaseUrl = 'https://kkndlynlaffnwqdmvvim.supabase.co';
+// const supabaseKey = String.fromEnvironment('SUPABASE_KEY');
+const supabaseKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtrbmRseW5sYWZmbndxZG12dmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk4MDg4NjAsImV4cCI6MjA1NTM4NDg2MH0.0YJupMaLKTyQLA9qgkzKIzYAGSYZJ1ZAqGt-O9FkWn0';
+
+Future<void> main() async {
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
   runApp(MyApp());
 }
 
@@ -21,7 +27,7 @@ class MyApp extends StatelessWidget {
       title: 'Boat Tours Lago di Como',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
       ),
       home: BoatMapScreen(),
     );
@@ -36,54 +42,7 @@ class BoatMapScreen extends StatefulWidget {
 }
 
 class BoatMapScreenState extends State<BoatMapScreen> {
-  final List<Boat> _boats = [
-    Boat(
-      id: 1,
-      name: "Perla del Lago",
-      captain: "Enrico",
-      price: 250.00,
-      images: [
-        "https://taxiboatlierna.it/images/limo/venetian_limousine_principale.jpg",
-        "https://taxiboatlierna.it/images/limo/venetian_limousine_principale.jpg",
-      ],
-      lat: 45.98661616223449,
-      lng: 9.257043874433045,
-      description:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc nec ultricies ultricies, nunc.",
-      company: Company(id: 1, name: "Como Boats Inc.", webAddress: 'https://taxiboatlierna.it/'),
-    ),
-    Boat(
-      id: 2,
-      name: "Vento di Como",
-      captain: "Marco",
-      price: 200.00,
-      images: [
-        "https://taxiboatlierna.it/images/venice/classicvenice_principale.jpg",
-        "https://taxiboatlierna.it/images/venice/classicvenice_principale.jpg",
-      ],
-      lat: 45.991224,
-      lng: 9.257900,
-      description:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc nec ultricies ultricies, nunc.",
-      company: Company(id: 1, name: "Como Boats Inc.", webAddress: 'https://taxiboatlierna.it/'),
-    ),
-    Boat(
-      id: 3,
-      name: "Onde Blu",
-      captain: "Alessandro",
-      price: 180.00,
-      images: [
-        "https://taxiboatlierna.it/images/flotta/como-dreamer.jpg",
-        "https://taxiboatlierna.it/images/flotta/como-dreamer.jpg",
-      ],
-      lat: 45.984500,
-      lng: 9.250000,
-      description:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc nec ultricies ultricies, nunc.",
-      company: Company(id: 1, name: "Como Boats Inc.", webAddress: 'https://taxiboatlierna.it/'),
-    ),
-  ];
-
+  List<Boat> _boats = [];
   Boat? _selectedBoat;
   String? _mapStyle;
   Set<Marker> _markers = {};
@@ -91,6 +50,49 @@ class BoatMapScreenState extends State<BoatMapScreen> {
       DraggableScrollableController();
   final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(false);
   ScrollController _listScrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMapStyle();
+    _loadBoatsFromSupabase();
+    _draggableScrollableController.addListener(() {
+      if (_draggableScrollableController.size > 0.1) {
+        _fabVisible.value = true;
+      } else {
+        _fabVisible.value = false;
+      }
+    });
+  }
+
+  Future<void> _loadMapStyle() async {
+    _mapStyle = await rootBundle.loadString('assets/map_style.json');
+    setState(() {});
+  }
+
+  Future<void> _loadBoatsFromSupabase() async {
+    try {
+      final boatsData = await Supabase.instance.client
+          .from('boats')
+          .select('''*, companies(*), boat_images(*)''');
+      setState(() {
+        _boats = (boatsData as List)
+            .map((boatData) => Boat.fromJson(boatData))
+            .toList();
+      });
+      _createMarkers();
+    } catch (error) {
+      print('Errore durante il caricamento delle barche: $error');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Errore durante il caricamento delle barche: $error'),
+            duration: const Duration(seconds: 20),
+            showCloseIcon: true,
+        ),
+      );
+    }
+  }
 
   Future<void> _createMarkers() async {
     _markers = (await Future.wait(_boats.map((boat) async {
@@ -120,25 +122,6 @@ class BoatMapScreenState extends State<BoatMapScreen> {
         .toSet();
 
     setState(() {});
-  }
-
-  Future<void> _loadMapStyle() async {
-    _mapStyle = await rootBundle.loadString('assets/map_style.json');
-    setState(() {});
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadMapStyle();
-    _createMarkers();
-    _draggableScrollableController.addListener(() {
-      if (_draggableScrollableController.size > 0.1) {
-        _fabVisible.value = true;
-      } else {
-        _fabVisible.value = false;
-      }
-    });
   }
 
   @override
@@ -185,20 +168,20 @@ class BoatMapScreenState extends State<BoatMapScreen> {
               left: 16,
               right: 16,
               child: BoatDetailCard.fromBoat(
-              _selectedBoat!,
-              onTap: () {
-                Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BoatDetailPage.fromBoat(
-                  boat: _selectedBoat!,
-                  ),
-                ),
-                );
-              },
-              onClose: () {
-                setState(() => _selectedBoat = null);
-              },
+                _selectedBoat!,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BoatDetailPage.fromBoat(
+                        boat: _selectedBoat!,
+                      ),
+                    ),
+                  );
+                },
+                onClose: () {
+                  setState(() => _selectedBoat = null);
+                },
               ),
             ),
           // Pannello draggable della lista delle barche
@@ -269,7 +252,8 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => BoatDetailPage.fromBoat(
+                                    builder: (context) =>
+                                        BoatDetailPage.fromBoat(
                                       boat: boat,
                                     ),
                                   ),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import '../models/boat_image.dart';
 
 class ImageCarousel extends StatefulWidget {
-  final List<String> images;
+  final List<BoatImage> images;
 
   const ImageCarousel({super.key, required this.images});
 
@@ -41,7 +42,7 @@ class ImageCarouselState extends State<ImageCarousel> {
             return GestureDetector(
               onTap: () => _openFullScreen(index),
               child: Image.network(
-                widget.images[index],
+                widget.images[index].url,
                 fit: BoxFit.cover,
                 width: double.infinity,
               ),
@@ -73,7 +74,7 @@ class ImageCarouselState extends State<ImageCarousel> {
 }
 
 class FullScreenCarousel extends StatefulWidget {
-  final List<String> images;
+  final List<BoatImage> images;
   final int initialPage;
 
   const FullScreenCarousel({
@@ -114,7 +115,7 @@ class FullScreenCarouselState extends State<FullScreenCarousel> {
         itemBuilder: (context, index) {
           return Center(
             child: Image.network(
-              widget.images[index],
+              widget.images[index].url,
               fit: BoxFit.contain,
             ),
           );
