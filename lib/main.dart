@@ -8,9 +8,7 @@ import 'widgets/boat_detail_card.dart';
 import 'widgets/custom_marker.dart';
 
 const supabaseUrl = 'https://kkndlynlaffnwqdmvvim.supabase.co';
-// const supabaseKey = String.fromEnvironment('SUPABASE_KEY');
-const supabaseKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtrbmRseW5sYWZmbndxZG12dmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk4MDg4NjAsImV4cCI6MjA1NTM4NDg2MH0.0YJupMaLKTyQLA9qgkzKIzYAGSYZJ1ZAqGt-O9FkWn0';
+const supabaseKey = String.fromEnvironment('SUPABASE_KEY');
 
 Future<void> main() async {
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
@@ -74,7 +72,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
     try {
       final boatsData = await Supabase.instance.client
           .from('boats')
-          .select('''*, companies(*), boat_images(*)''');
+          .select('*, companies(*), boat_images(*)');
       setState(() {
         _boats = (boatsData as List)
             .map((boatData) => Boat.fromJson(boatData))
@@ -82,7 +80,6 @@ class BoatMapScreenState extends State<BoatMapScreen> {
       });
       _createMarkers();
     } catch (error) {
-      print('Errore durante il caricamento delle barche: $error');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
