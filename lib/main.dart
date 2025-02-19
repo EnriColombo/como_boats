@@ -46,7 +46,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
   Set<Marker> _markers = {};
   final DraggableScrollableController _draggableScrollableController =
       DraggableScrollableController();
-  final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(true);
   ScrollController _listScrollController = ScrollController();
 
   @override
@@ -183,7 +183,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
             ),
           // Pannello draggable della lista delle barche
           DraggableScrollableSheet(
-            initialChildSize: initialChildSize,
+            initialChildSize: 1.0,
             minChildSize: initialChildSize,
             maxChildSize: 1.0,
             controller: _draggableScrollableController,
