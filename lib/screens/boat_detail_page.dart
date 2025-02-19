@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/boat.dart';
 import '../widgets/image_carousel.dart';
 
-class BoatDetailPage extends StatelessWidget {
+class BoatDetailPage extends StatefulWidget {
   final Boat boat;
   final String tourDescription;
 
   const BoatDetailPage.fromBoat({
     super.key,
     required this.boat,
-  })  : tourDescription =
+  }) : tourDescription =
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse potenti. Nulla facilisi.';
 
+  @override
+  State<BoatDetailPage> createState() => _BoatDetailPageState();
+}
+
+class _BoatDetailPageState extends State<BoatDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +41,7 @@ class BoatDetailPage extends StatelessWidget {
             // Carosello delle foto
             SizedBox(
               height: 300,
-              child: ImageCarousel(images: boat.images),
+              child: ImageCarousel(images: widget.boat.images),
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -44,13 +50,13 @@ class BoatDetailPage extends StatelessWidget {
                 children: [
                   // Nome della barca
                   Text(
-                    boat.name,
+                    widget.boat.name,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   SizedBox(height: 8),
                   // Descrizione della barca
                   Text(
-                    boat.description,
+                    widget.boat.description,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   SizedBox(height: 16),
@@ -59,7 +65,7 @@ class BoatDetailPage extends StatelessWidget {
                     children: [
                       Text('Capitano: ',
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(boat.captain),
+                      Text(widget.boat.captain),
                     ],
                   ),
                   SizedBox(height: 8),
@@ -68,13 +74,23 @@ class BoatDetailPage extends StatelessWidget {
                     children: [
                       Text('Società: ',
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      GestureDetector(
-                        onTap: () {
-                          // TODO: Abilita il link per la società
-                          // boat.company.webAddress;
+                      InkWell(
+                        onTap: () async {
+                          final Uri url =
+                              Uri.parse(widget.boat.company.webAddress);
+                          // Capture the ScaffoldMessenger before the async gap.
+                          final scaffoldMessenger =
+                              ScaffoldMessenger.of(context);
+                          if (!await launchUrl(url,
+                              mode: LaunchMode.externalApplication)) {
+                            if (!mounted) return;
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(content: Text('Could not launch $url')),
+                            );
+                          }
                         },
                         child: Text(
-                          boat.company.name,
+                          widget.boat.company.name,
                           style: TextStyle(
                             color: Colors.blue,
                             decoration: TextDecoration.underline,
@@ -91,13 +107,13 @@ class BoatDetailPage extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    tourDescription,
+                    widget.tourDescription,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   SizedBox(height: 16),
                   // Prezzo
                   Text(
-                    'Prezzo: €${boat.price}/ora',
+                    'Prezzo: €${widget.boat.price}/ora',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   SizedBox(height: 32),

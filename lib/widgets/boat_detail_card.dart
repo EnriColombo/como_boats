@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-
 import '../models/boat.dart';
+import '../models/boat_image.dart';
 
 class BoatDetailCard extends StatefulWidget {
   final String name;
   final String captain;
   final double price;
-  final List<String> images;
+  final List<BoatImage> images;
   final VoidCallback? onClose; // parametro onClose opzionale
   final VoidCallback? onTap; // parametro onTap opzionale
 
@@ -70,7 +70,7 @@ class BoatDetailCardState extends State<BoatDetailCard> {
                           borderRadius:
                               BorderRadius.vertical(top: Radius.circular(16)),
                           child: Image.network(
-                            widget.images[index],
+                            widget.images[index].url,
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),
