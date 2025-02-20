@@ -23,10 +23,12 @@ class BoatMapScreenState extends State<BoatMapScreen> {
       DraggableScrollableController();
   final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(true);
   ScrollController _listScrollController = ScrollController();
-  double _currentSheetSize = 0.08;
-
+  // DraggableScrollableSheet percentage heights
+  final double _minSheetSize = 0.08;
+  final double _maxSheetSize = 1.0;
+  double _currentSheetSize = 1.0;
   // Soglia per mostrare la barra di navigazione
-  final double _navBarThreshold = 0.3;
+  final double _navBarThreshold = 0.2;
 
   @override
   void initState() {
@@ -94,8 +96,10 @@ class BoatMapScreenState extends State<BoatMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const initialChildSize = 0.08;
     return Scaffold(
+      // Fa sì che la bottomNavigationBar sia sopra il contenuto,
+      // ovvero quando nascosta non riserva spazio
+      extendBody: true,
       appBar: AppBar(
         title: const Text('Boat Tours Lago di Como'),
       ),
@@ -113,7 +117,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
               setState(() {
                 _selectedBoat = null;
                 _draggableController.animateTo(
-                  initialChildSize,
+                  _minSheetSize,
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeInOut,
                 );
@@ -144,9 +148,9 @@ class BoatMapScreenState extends State<BoatMapScreen> {
             ),
           // Draggable panel showing list of boats
           DraggableScrollableSheet(
-            initialChildSize: 1.0,
-            minChildSize: initialChildSize,
-            maxChildSize: 1.0,
+            initialChildSize: _maxSheetSize,
+            minChildSize: _minSheetSize,
+            maxChildSize: _maxSheetSize,
             controller: _draggableController,
             builder: (context, scrollController) {
               _listScrollController = scrollController;
@@ -154,6 +158,8 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius:
+                      _currentSheetSize == 1.0 ?                     
+                      BorderRadius.zero :
                       const BorderRadius.vertical(top: Radius.circular(16)),
                   boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
                 ),
@@ -237,7 +243,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                     setState(() {
                       _selectedBoat = null;
                       _draggableController.animateTo(
-                        initialChildSize,
+                        _minSheetSize,
                         duration: const Duration(milliseconds: 500),
                         curve: Curves.easeInOut,
                       );
@@ -255,8 +261,8 @@ class BoatMapScreenState extends State<BoatMapScreen> {
       // Barra di navigazione inferiore animata
       bottomNavigationBar: AnimatedSlide(
         offset: _currentSheetSize > _navBarThreshold
-            ? const Offset(0, 0)
-            : const Offset(0, 1),
+            ? const Offset(0, 0)  // Navbar visible
+            : const Offset(0, 1), // Navbar hidden
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
         child: Container(
@@ -276,6 +282,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
     );
   }
 
+  // TODO: estrarlo in un widget separato
   Widget _buildNavItem({
     required IconData icon,
     required String label,
@@ -283,7 +290,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
   }) {
     return InkWell(
       onTap: () {
-        // In futuro potrai gestire la navigazione verso le altre funzionalità.
+        // TODO: In futuro potrai gestire la navigazione verso le altre funzionalità.
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
