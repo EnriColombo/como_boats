@@ -23,6 +23,9 @@ class BoatMapScreenState extends State<BoatMapScreen> {
   final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(true);
   ScrollController _listScrollController = ScrollController();
 
+  // Soglia per mostrare la barra di navigazione
+  final double _navBarThreshold = 0.3;
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +33,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
     _fetchBoats();
     _draggableController.addListener(() {
       _fabVisible.value = _draggableController.size > 0.1;
+      setState(() {}); // Aggiorna lo stato per far ricalcolare l'offset della nav bar
     });
   }
 
@@ -60,7 +64,6 @@ class BoatMapScreenState extends State<BoatMapScreen> {
       final String price = "€${boat.price}/ora";
       final Uint8List? markerIcon = await CustomMarker.createCustomMarkerBitmap(name, price);
       final BitmapDescriptor bitmapDescriptor = BitmapDescriptor.bytes(markerIcon!);
-
       return Marker(
         markerId: MarkerId(boat.id.toString()),
         position: LatLng(boat.lat, boat.lng),
@@ -175,8 +178,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
                               '${_boats.length} barche disponibili',
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
@@ -238,6 +240,51 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                 )
               : const SizedBox.shrink();
         },
+      ),
+      // Barra di navigazione inferiore animata
+      bottomNavigationBar: AnimatedSlide(
+        offset: _draggableController.size > _navBarThreshold ? const Offset(0, 0) : const Offset(0, 1),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        child: Container(
+          color: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(icon: Icons.search, label: 'Esplora', active: true),
+              _buildNavItem(icon: Icons.favorite, label: 'Preferiti'),
+              _buildNavItem(icon: Icons.directions_boat, label: 'Prenotazioni'),
+              _buildNavItem(icon: Icons.person, label: 'Accedi'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required IconData icon,
+    required String label,
+    bool active = false,
+  }) {
+    return InkWell(
+      onTap: () {
+        // In futuro potrai gestire la navigazione verso le altre funzionalità.
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: active ? Colors.blue : Colors.grey),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: active ? Colors.blue : Colors.grey,
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
   }
