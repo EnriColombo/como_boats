@@ -5,6 +5,7 @@ import '../models/boat.dart';
 import '../services/boat_service.dart';
 import '../widgets/boat_detail_card.dart';
 import '../widgets/custom_marker.dart';
+import '../widgets/nav_item.dart';
 import 'boat_detail_page.dart';
 
 class BoatMapScreen extends StatefulWidget {
@@ -19,9 +20,16 @@ class BoatMapScreenState extends State<BoatMapScreen> {
   Boat? _selectedBoat;
   String? _mapStyle;
   Set<Marker> _markers = {};
-  final DraggableScrollableController _draggableController = DraggableScrollableController();
+  final DraggableScrollableController _draggableController =
+      DraggableScrollableController();
   final ValueNotifier<bool> _fabVisible = ValueNotifier<bool>(true);
   ScrollController _listScrollController = ScrollController();
+  // DraggableScrollableSheet percentage heights
+  final double _minSheetSize = 0.08;
+  final double _maxSheetSize = 1.0;
+  double _currentSheetSize = 1.0;
+  // Soglia per mostrare la barra di navigazione
+  final double _navBarThreshold = 0.2;
 
   @override
   void initState() {
@@ -30,6 +38,10 @@ class BoatMapScreenState extends State<BoatMapScreen> {
     _fetchBoats();
     _draggableController.addListener(() {
       _fabVisible.value = _draggableController.size > 0.1;
+      // Aggiorna lo stato per far ricalcolare l'offset della nav bar
+      setState(() {
+        _currentSheetSize = _draggableController.size;
+      });
     });
   }
 
@@ -58,9 +70,10 @@ class BoatMapScreenState extends State<BoatMapScreen> {
     final markersList = await Future.wait(_boats.map((boat) async {
       final String name = boat.name;
       final String price = "€${boat.price}/ora";
-      final Uint8List? markerIcon = await CustomMarker.createCustomMarkerBitmap(name, price);
-      final BitmapDescriptor bitmapDescriptor = BitmapDescriptor.bytes(markerIcon!);
-
+      final Uint8List? markerIcon =
+          await CustomMarker.createCustomMarkerBitmap(name, price);
+      final BitmapDescriptor bitmapDescriptor =
+          BitmapDescriptor.bytes(markerIcon!);
       return Marker(
         markerId: MarkerId(boat.id.toString()),
         position: LatLng(boat.lat, boat.lng),
@@ -84,8 +97,10 @@ class BoatMapScreenState extends State<BoatMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const initialChildSize = 0.08;
     return Scaffold(
+      // Fa sì che la bottomNavigationBar sia sopra il contenuto,
+      // ovvero quando nascosta non riserva spazio
+      extendBody: true,
       appBar: AppBar(
         title: const Text('Boat Tours Lago di Como'),
       ),
@@ -103,7 +118,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
               setState(() {
                 _selectedBoat = null;
                 _draggableController.animateTo(
-                  initialChildSize,
+                  _minSheetSize,
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeInOut,
                 );
@@ -122,7 +137,8 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => BoatDetailPage.fromBoat(boat: _selectedBoat!),
+                      builder: (context) =>
+                          BoatDetailPage.fromBoat(boat: _selectedBoat!),
                     ),
                   );
                 },
@@ -133,16 +149,18 @@ class BoatMapScreenState extends State<BoatMapScreen> {
             ),
           // Draggable panel showing list of boats
           DraggableScrollableSheet(
-            initialChildSize: 1.0,
-            minChildSize: initialChildSize,
-            maxChildSize: 1.0,
+            initialChildSize: _maxSheetSize,
+            minChildSize: _minSheetSize,
+            maxChildSize: _maxSheetSize,
             controller: _draggableController,
             builder: (context, scrollController) {
               _listScrollController = scrollController;
               return Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: _currentSheetSize == 1.0
+                      ? BorderRadius.zero
+                      : const BorderRadius.vertical(top: Radius.circular(16)),
                   boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
                 ),
                 child: Column(
@@ -197,7 +215,8 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => BoatDetailPage.fromBoat(boat: boat),
+                                    builder: (context) =>
+                                        BoatDetailPage.fromBoat(boat: boat),
                                   ),
                                 );
                               },
@@ -224,7 +243,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                     setState(() {
                       _selectedBoat = null;
                       _draggableController.animateTo(
-                        initialChildSize,
+                        _minSheetSize,
                         duration: const Duration(milliseconds: 500),
                         curve: Curves.easeInOut,
                       );
@@ -238,6 +257,27 @@ class BoatMapScreenState extends State<BoatMapScreen> {
                 )
               : const SizedBox.shrink();
         },
+      ),
+      // Barra di navigazione inferiore animata
+      bottomNavigationBar: AnimatedSlide(
+        offset: _currentSheetSize > _navBarThreshold
+            ? const Offset(0, 0) // Navbar visible
+            : const Offset(0, 1), // Navbar hidden
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        child: Container(
+          color: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              NavItem(icon: Icons.search, label: 'Esplora', active: true),
+              NavItem(icon: Icons.favorite, label: 'Preferiti'),
+              NavItem(icon: Icons.directions_boat, label: 'Prenotazioni'),
+              NavItem(icon: Icons.person, label: 'Accedi'),
+            ],
+          ),
+        ),
       ),
     );
   }
