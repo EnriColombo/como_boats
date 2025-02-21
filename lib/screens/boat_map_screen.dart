@@ -5,6 +5,7 @@ import '../models/boat.dart';
 import '../services/boat_service.dart';
 import '../widgets/boat_detail_card.dart';
 import '../widgets/custom_marker.dart';
+import '../widgets/nav_item.dart';
 import 'boat_detail_page.dart';
 
 class BoatMapScreen extends StatefulWidget {
@@ -157,10 +158,9 @@ class BoatMapScreenState extends State<BoatMapScreen> {
               return Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius:
-                      _currentSheetSize == 1.0 ?                     
-                      BorderRadius.zero :
-                      const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: _currentSheetSize == 1.0
+                      ? BorderRadius.zero
+                      : const BorderRadius.vertical(top: Radius.circular(16)),
                   boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
                 ),
                 child: Column(
@@ -261,7 +261,7 @@ class BoatMapScreenState extends State<BoatMapScreen> {
       // Barra di navigazione inferiore animata
       bottomNavigationBar: AnimatedSlide(
         offset: _currentSheetSize > _navBarThreshold
-            ? const Offset(0, 0)  // Navbar visible
+            ? const Offset(0, 0) // Navbar visible
             : const Offset(0, 1), // Navbar hidden
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -271,40 +271,13 @@ class BoatMapScreenState extends State<BoatMapScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(icon: Icons.search, label: 'Esplora', active: true),
-              _buildNavItem(icon: Icons.favorite, label: 'Preferiti'),
-              _buildNavItem(icon: Icons.directions_boat, label: 'Prenotazioni'),
-              _buildNavItem(icon: Icons.person, label: 'Accedi'),
+              NavItem(icon: Icons.search, label: 'Esplora', active: true),
+              NavItem(icon: Icons.favorite, label: 'Preferiti'),
+              NavItem(icon: Icons.directions_boat, label: 'Prenotazioni'),
+              NavItem(icon: Icons.person, label: 'Accedi'),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  // TODO: estrarlo in un widget separato
-  Widget _buildNavItem({
-    required IconData icon,
-    required String label,
-    bool active = false,
-  }) {
-    return InkWell(
-      onTap: () {
-        // TODO: In futuro potrai gestire la navigazione verso le altre funzionalità.
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: active ? Colors.blue : Colors.grey),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: active ? Colors.blue : Colors.grey,
-              fontSize: 12,
-            ),
-          ),
-        ],
       ),
     );
   }
