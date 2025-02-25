@@ -50,16 +50,16 @@ app.*.map.json
 #android/app/.cxx
 
 # Android
-android/
+/android/
 
 # iOS
-ios/
+/ios/
 
 # linux
-linux/
+/linux/
 
 # macOS
-macos/
+/macos/
 
 # web
-web/
+/web/
